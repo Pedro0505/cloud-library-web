@@ -12,7 +12,7 @@ Site para cadastrar e vizualizar livros
 Clone o projeto
 
 ```bash
-  git@github.com:Pedro0505/cloud-library-web.git
+  git clone git@github.com:Pedro0505/cloud-library-web.git
 ```
 
 Entre no diretório do projeto
