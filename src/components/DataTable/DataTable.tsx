@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { DataGrid, GridColDef } from '@mui/x-data-grid';
-import { BookWritersContext } from '../context/BookWritersContext';
-import ITableRows from '../interfaces/ITableRows';
+import { BookWritersContext } from '../../context/BookWritersContext';
+import ITableRows from '../../interfaces/ITableRows';
+import './style.css';
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'Id', width: 130 },
@@ -19,7 +20,11 @@ function DataTable() {
 
   useEffect(() => {
     const fetchRows = async () => {
-      getAllBookWriters();
+      try {
+        getAllBookWriters();
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     fetchRows();
@@ -40,7 +45,7 @@ function DataTable() {
   }, [booksWriters]);
 
   return (
-    <div style={{ height: 302, width: '100%' }}>
+    <div className="data-table">
       <DataGrid
         rows={rows}
         columns={columns}

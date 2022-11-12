@@ -7,13 +7,16 @@ import {
 import { DesktopDatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
-import { BookWritersContext } from '../context/BookWritersContext';
+import FormCreateSchemas from './validations/FormCreateSchemas';
+import { BookWritersContext } from '../../context/BookWritersContext';
+import './style.css';
 
 export default function FormCreateWriter() {
   const { handleSetWriters } = useContext(BookWritersContext);
   const [birthDate, setBirthDate] = useState<Dayjs | null>(dayjs(new Date()));
-  const [sex, setSex] = React.useState<'Male' | 'Female' | 'Other'>('Male');
-  const [name, setName] = React.useState<string>('');
+  const [sex, setSex] = useState<'Male' | 'Female' | 'Other'>('Male');
+  const [name, setName] = useState<string>('');
+  const [errorInputs, setErrorInput] = useState('');
 
   const handleChangeDate = (newValue: Dayjs | null) => {
     setBirthDate(newValue);
@@ -28,17 +31,39 @@ export default function FormCreateWriter() {
   };
 
   const addWriter = async () => {
-    await handleSetWriters({
-      birthDate: birthDate?.toISOString() || new Date().toISOString(),
+    const toValidate = {
       name,
-      sex,
-    });
+    };
+
+    const { error: errorJoi } = FormCreateSchemas.validate(toValidate);
+
+    console.log(errorJoi);
+    if (!errorJoi) {
+      try {
+        const newWriter = {
+          ...toValidate,
+          birthDate: birthDate?.toISOString() || new Date().toISOString(),
+          sex,
+        };
+
+        await handleSetWriters(newWriter);
+        setErrorInput('');
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      setErrorInput(errorJoi.message);
+    }
   };
 
   return (
-    <form>
-      <Stack spacing={2} direction="row" paddingBottom="10px" paddingTop="10px">
-        <TextField id="name-field" label="Nome" variant="outlined" onChange={ handleChangeName } value={ name } />
+    <form className="form-create-writer">
+      <h3 className="title-form-writer no-select">Adicione um novo autor</h3>
+      <Stack spacing={2} direction="row" paddingLeft="15px" paddingBottom="10px" paddingTop="10px">
+        <div className="name-container">
+          <TextField id="name-field" label="Nome" variant="outlined" error={ Boolean(errorInputs.length) } onChange={ handleChangeName } value={ name } />
+          <p className="error-message-writer no-select">{ errorInputs }</p>
+        </div>
         <LocalizationProvider dateAdapter={ AdapterDayjs }>
           <DesktopDatePicker
             label="Data de Aniversário"
@@ -62,7 +87,7 @@ export default function FormCreateWriter() {
             <MenuItem value={'Other'}>Outro</MenuItem>
           </Select>
         </FormControl>
-        <Button onClick={ addWriter } variant="contained">Adicionar Autor</Button>
+        <Button style={ { height: '56px' } } onClick={ addWriter } variant="contained">Adicionar Autor</Button>
       </Stack>
     </form>
   );
